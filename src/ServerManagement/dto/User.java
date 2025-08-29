@@ -1,13 +1,12 @@
 package ServerManagement.dto;
 
-public class RegisterRequest {
+public class User {
     private String id;
     private String password;
     private String ip;
     private String port;
     private String database;
-
-    // Getters and Setters
+    
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     

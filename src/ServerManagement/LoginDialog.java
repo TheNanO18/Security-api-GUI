@@ -16,7 +16,7 @@ public class LoginDialog extends JDialog {
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
-        cs.fill = GridBagConstraints.HORIZONTAL;
+        cs.fill   = GridBagConstraints.HORIZONTAL;
         cs.insets = new Insets(5, 5, 5, 5);
 
         cs.gridx = 0;
@@ -24,21 +24,21 @@ public class LoginDialog extends JDialog {
         cs.gridwidth = 1;
         panel.add(new JLabel("Username:"), cs);
 
-        cs.gridx = 1;
-        cs.gridy = 0;
+        cs.gridx     = 1;
+        cs.gridy     = 0;
         cs.gridwidth = 2;
-        tfUsername = new JTextField(20);
+        tfUsername   = new JTextField(20);
         panel.add(tfUsername, cs);
 
-        cs.gridx = 0;
-        cs.gridy = 1;
+        cs.gridx     = 0;
+        cs.gridy     = 1;
         cs.gridwidth = 1;
         panel.add(new JLabel("Password:"), cs);
 
-        cs.gridx = 1;
-        cs.gridy = 1;
+        cs.gridx     = 1;
+        cs.gridy     = 1;
         cs.gridwidth = 2;
-        pfPassword = new JPasswordField(20);
+        pfPassword   = new JPasswordField(20);
         panel.add(pfPassword, cs);
 
         btnLogin = new JButton("Login");

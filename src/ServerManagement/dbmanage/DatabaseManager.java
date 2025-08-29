@@ -10,7 +10,7 @@ public class DatabaseManager {
     private final String dbPass;
 
     public DatabaseManager(String url, String user, String password) {
-        this.dbUrl = url;
+        this.dbUrl  = url;
         this.dbUser = user;
         this.dbPass = password;
         
