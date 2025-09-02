@@ -24,6 +24,6 @@ public class RegisterRequest {
     public String getDatabase() { return database; }
     public void setDatabase(String database) { this.database = database; }
     
-    public String getRefreshToken() { return refreshToken; }
-    public void setRefreshToken(String refreshToken) { this.database = refreshToken; }
+    public String getRefreshToken() { return refreshToken; }	
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

@@ -24,5 +24,5 @@ public class User {
     public void setDatabase(String database) { this.database = database; }
     
     public String getRefreshToken() { return refreshToken; }
-    public void setRefreshToken(String refreshToken) { this.database = refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

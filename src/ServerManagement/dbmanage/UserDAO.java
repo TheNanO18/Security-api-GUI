@@ -57,6 +57,7 @@ public class UserDAO {
                 user.setIp(rs.getString("ip"));
                 user.setPort(rs.getString("port"));
                 user.setDatabase(rs.getString("database"));
+                user.setRefreshToken(rs.getString("refresh_token"));
                 users.add(user);
             }
         }

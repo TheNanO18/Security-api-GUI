@@ -158,7 +158,7 @@ public class ServerManagerGUI extends JFrame {
                     List<User> users = get();
                     tableModel.setRowCount(0); // Clear existing data
                     for (User user : users) {
-                        tableModel.addRow(new Object[]{user.getId(), user.getIp(), user.getPort(), user.getDatabase(), user.getPassword()});
+                        tableModel.addRow(new Object[]{user.getId(), user.getIp(), user.getPort(), user.getDatabase(), user.getPassword(), user.getRefreshToken()});
                     }
                     log("User list loaded successfully (" + users.size() + " users found).");
                 } catch (Exception e) {
