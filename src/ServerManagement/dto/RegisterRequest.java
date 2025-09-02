@@ -6,6 +6,7 @@ public class RegisterRequest {
     private String ip;
     private String port;
     private String database;
+    private String refreshToken;
 
     // Getters and Setters
     public String getId() { return id; }
@@ -22,4 +23,7 @@ public class RegisterRequest {
     
     public String getDatabase() { return database; }
     public void setDatabase(String database) { this.database = database; }
+    
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.database = refreshToken; }
 }

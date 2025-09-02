@@ -6,6 +6,7 @@ public class User {
     private String ip;
     private String port;
     private String database;
+    private String refreshToken;
     
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -21,4 +22,7 @@ public class User {
     
     public String getDatabase() { return database; }
     public void setDatabase(String database) { this.database = database; }
+    
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.database = refreshToken; }
 }

@@ -27,7 +27,7 @@ public class UserDAO {
 
         // Assumes your table is 'en_user' and has these columns.
         // Adjust the SQL query to match your actual table structure.
-        String sql = "INSERT INTO en_user (id, password, ip, port, database) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO en_user (id, password, ip, port, database, refresh_token) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, userData.getId());
@@ -35,6 +35,7 @@ public class UserDAO {
             pstmt.setString(3, userData.getIp());
             pstmt.setString(4, userData.getPort());
             pstmt.setString(5, userData.getDatabase());
+            pstmt.setString(6, userData.getRefreshToken());
 
             int affectedRows = pstmt.executeUpdate();
             
@@ -46,7 +47,7 @@ public class UserDAO {
     
     public List<User> getAllUsers(Connection conn) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT id, password, ip, port, database FROM en_user";
+        String sql = "SELECT id, password, ip, port, database, refresh_token FROM en_user";
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {

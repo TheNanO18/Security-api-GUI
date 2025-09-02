@@ -101,7 +101,7 @@ public class ServerManagerGUI extends JFrame {
     private JPanel createManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        String[] columnNames = {"ID", "IP", "Port", "Database", "Password Hash"};
+        String[] columnNames = {"ID", "IP", "Port", "Database", "Password Hash", "Refresh Token"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             private static final long serialVersionUID = 1L;
             @Override
@@ -253,8 +253,6 @@ public class ServerManagerGUI extends JFrame {
         }.execute();
     }
     
-    // --- The rest of your existing methods (createCreateUserPanel, saveNewUser, startServer, etc.) ---
-    // ... They are included here without changes for a complete file ...
     private JPanel createCreateUserPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
