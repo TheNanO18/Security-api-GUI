@@ -1,12 +1,49 @@
 package ServerManagement;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.table.DefaultTableModel;
 
 // Imports for the "Create User" and "User Management" features
 import ServerManagement.config.ConfigLoader;
@@ -39,6 +76,12 @@ public class ServerManagerGUI extends JFrame {
     private JButton refreshUsersButton;
     private JButton updateUserButton;
     private JButton deleteUserButton;
+    
+    // ✅ NEW: GUI Components for Log Management
+    private JList<File> logFileList;
+    private DefaultListModel<File> logListModel;
+    private JTextArea logContentArea;
+    private JButton refreshLogListButton;
 
     // Process Management
     private Process serverProcess;
@@ -70,13 +113,15 @@ public class ServerManagerGUI extends JFrame {
         serverControlPanel.add(logScrollPane, BorderLayout.CENTER);
         
         JPanel createUserPanel = createCreateUserPanel();
-        JPanel userManagementPanel = createManagementPanel();
+        JPanel userManagementPanel = createServerManagementPanel();
+        JPanel logManagementPanel = createLogManagementPanel();
 
         // --- Step 3: Create and add tabs ---
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Server Control", serverControlPanel);
         tabbedPane.addTab("Create User", createUserPanel);
         tabbedPane.addTab("User Management", userManagementPanel);
+        tabbedPane.addTab("Log Management", logManagementPanel);
 
         // --- Step 4: Finalize layout and actions ---
         setLayout(new BorderLayout());
@@ -88,6 +133,7 @@ public class ServerManagerGUI extends JFrame {
         
         // ✅ NEW: Add ActionListeners for the new buttons
         refreshUsersButton.addActionListener(e -> loadUsers());
+        refreshLogListButton.addActionListener(e -> loadLogFiles());
         deleteUserButton.addActionListener(e -> deleteSelectedUser());
         updateUserButton.addActionListener(e -> updateSelectedUser());
 
@@ -98,7 +144,7 @@ public class ServerManagerGUI extends JFrame {
     }
     
     // This method creates the UI for the User Management tab
-    private JPanel createManagementPanel() {
+    private JPanel createServerManagementPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         String[] columnNames = {"ID", "IP", "Port", "Database", "Password Hash", "Refresh Token"};
@@ -115,7 +161,7 @@ public class ServerManagerGUI extends JFrame {
         JScrollPane tableScrollPane = new JScrollPane(userTable);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        refreshUsersButton = new JButton("Refresh List");
+        refreshUsersButton = new JButton("Refresh User List");
         updateUserButton   = new JButton("Update Selected");
         deleteUserButton   = new JButton("Delete Selected");
         
@@ -139,6 +185,104 @@ public class ServerManagerGUI extends JFrame {
         return panel;
     }
     
+    private JPanel createLogManagementPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        
+        // Log file list on the left
+        logListModel = new DefaultListModel<>();
+        logFileList = new JList<>(logListModel);
+        JScrollPane listScrollPane = new JScrollPane(logFileList);
+        listScrollPane.setPreferredSize(new Dimension(200, 0));
+
+        // Log content view on the right
+        logContentArea = new JTextArea();
+        logContentArea.setEditable(false);
+        logContentArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane contentScrollPane = new JScrollPane(logContentArea);
+        
+        // Split pane to make the view resizable
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listScrollPane, contentScrollPane);
+        splitPane.setDividerLocation(200);
+
+        // Buttons panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        refreshLogListButton = new JButton("Refresh Log List");
+        buttonPanel.add(refreshLogListButton);
+
+        panel.add(splitPane, BorderLayout.CENTER);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        // Add listener to load file content when a file is selected
+        logFileList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                File selectedFile = logFileList.getSelectedValue();
+                if (selectedFile != null) {
+                    loadLogFileContent(selectedFile);
+                }
+            }
+        });
+        
+        return panel;
+    }
+
+    // ✅ NEW: Logic to find and list log files
+    private void loadLogFiles() {
+        refreshLogListButton.setEnabled(false);
+        new SwingWorker<List<File>, Void>() {
+            @Override
+            protected List<File> doInBackground() throws Exception {
+                File jarDir = new File(jarPath).getParentFile();
+                File logsDir = new File(jarDir, "logs");
+                if (logsDir.exists() && logsDir.isDirectory()) {
+                    File[] files = logsDir.listFiles((dir, name) -> name.endsWith(".log"));
+                    if (files != null) {
+                        List<File> fileList = new ArrayList<>(Arrays.asList(files));
+                        // Sort by most recent first
+                        fileList.sort(Comparator.comparing(File::lastModified).reversed());
+                        return fileList;
+                    }
+                }
+                return Collections.emptyList();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<File> files = get();
+                    logListModel.clear();
+                    for (File file : files) {
+                        logListModel.addElement(file);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    refreshLogListButton.setEnabled(true);
+                }
+            }
+        }.execute();
+    }
+
+    // ✅ NEW: Logic to read a selected log file and display its content
+    private void loadLogFileContent(File logFile) {
+        logContentArea.setText("Loading " + logFile.getName() + "...");
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                return Files.readString(Paths.get(logFile.toURI()));
+            }
+            @Override
+            protected void done() {
+                try {
+                    logContentArea.setText(get());
+                    logContentArea.setCaretPosition(0); // Scroll to top
+                } catch (Exception e) {
+                    logContentArea.setText("Error reading file: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }.execute();
+    }
+    
     // ✅ NEW: Logic to load all users into the JTable
     private void loadUsers() {
         refreshUsersButton.setEnabled(false);
@@ -156,7 +300,7 @@ public class ServerManagerGUI extends JFrame {
             protected void done() {
                 try {
                     List<User> users = get();
-                    tableModel.setRowCount(0); // Clear existing data
+                    tableModel.setRowCount(0); // Clear existing 
                     for (User user : users) {
                         tableModel.addRow(new Object[]{user.getId(), user.getIp(), user.getPort(), user.getDatabase(), user.getPassword(), user.getRefreshToken()});
                     }
